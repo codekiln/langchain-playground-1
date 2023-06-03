@@ -1,2 +1,3 @@
 langchain
 openai
+-r requirements-dev.txt
