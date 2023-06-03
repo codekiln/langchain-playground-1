@@ -52,7 +52,7 @@ def get_demo_conversation_chain(convo_msg_starter="Hi there!"):
 
 def get_message_completions_from_chat_model():
     from langchain.chat_models import ChatOpenAI
-    from langchain.schema import AIMessage, HumanMessage, SystemMessage
+    from langchain.schema import HumanMessage, SystemMessage
 
     chat = ChatOpenAI(temperature=0)
 
@@ -80,6 +80,35 @@ def get_message_completions_from_chat_model():
         ],
     ]
     result = chat.generate(batch_messages)
+
+
+def get_chat_prompt_template_examples():
+    """
+    https://python.langchain.com/en/latest/getting_started/getting_started.html#chat-prompt-templates
+    """
+    from langchain.chat_models import ChatOpenAI
+    from langchain.prompts.chat import (
+        ChatPromptTemplate,
+        SystemMessagePromptTemplate,
+        HumanMessagePromptTemplate,
+    )
+
+    chat = ChatOpenAI(temperature=0)
+
+    template = "You are a helpful assistant that translates {input_language} to {output_language}."
+    system_message_prompt = SystemMessagePromptTemplate.from_template(template)
+    human_template = "{text}"
+    human_message_prompt = HumanMessagePromptTemplate.from_template(human_template)
+
+    chat_prompt = ChatPromptTemplate.from_messages([system_message_prompt, human_message_prompt])
+
+    # get a chat completion from the formatted messages
+    chat(
+        chat_prompt.format_prompt(
+            input_language="English", output_language="French", text="I love programming."
+        ).to_messages()
+    )
+    # -> AIMessage(content="J'aime programmer.", additional_kwargs={})
 
 
 def sample_serpapi_search_results(
