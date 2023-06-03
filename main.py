@@ -129,6 +129,32 @@ def sample_serpapi_search_results(
     return agent.run(sample_query)
 
 
+def sample_chains_with_chat_models():
+    """
+    The point here is that you can use prompt templates with chains
+    https://python.langchain.com/en/latest/getting_started/getting_started.html#chains-with-chat-models
+    """
+    from langchain.chat_models import ChatOpenAI
+    from langchain import LLMChain
+    from langchain.prompts.chat import (
+        ChatPromptTemplate,
+        SystemMessagePromptTemplate,
+        HumanMessagePromptTemplate,
+    )
+
+    chat = ChatOpenAI(temperature=0)
+
+    template = "You are a helpful assistant that translates {input_language} to {output_language}."
+    system_message_prompt = SystemMessagePromptTemplate.from_template(template)
+    human_template = "{text}"
+    human_message_prompt = HumanMessagePromptTemplate.from_template(human_template)
+    chat_prompt = ChatPromptTemplate.from_messages([system_message_prompt, human_message_prompt])
+
+    chain = LLMChain(llm=chat, prompt=chat_prompt, verbose=True)
+    chain.run(input_language="English", output_language="French", text="I love programming.")
+    # -> "J'aime programmer."
+
+
 if __name__ == "__main__":
     llm = OpenAI(temperature=0.9)
     # get_socks_name(llm)
@@ -138,3 +164,4 @@ if __name__ == "__main__":
     # sample_serpapi_search_results()
     # get_demo_conversation_chain()
     # get_message_completions_from_chat_model()
+    # sample_chains_with_chat_models()
