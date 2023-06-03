@@ -40,6 +40,48 @@ def test_serpapi_api_key():
     return result
 
 
+def get_demo_conversation_chain(convo_msg_starter="Hi there!"):
+    from langchain import ConversationChain
+
+    llm = OpenAI(temperature=0)
+    conversation = ConversationChain(llm=llm, verbose=True)
+    output = conversation.predict(input=convo_msg_starter)
+    print(output)
+    return output
+
+
+def get_message_completions_from_chat_model():
+    from langchain.chat_models import ChatOpenAI
+    from langchain.schema import AIMessage, HumanMessage, SystemMessage
+
+    chat = ChatOpenAI(temperature=0)
+
+    # basic example
+    # chat([HumanMessage(content="Translate this sentence from English to French. I love programming.")])
+    # -> AIMessage(content="J'aime programmer.", additional_kwargs={})
+
+    # example with multiple messages
+    # messages = [
+    #     SystemMessage(content="You are a helpful assistant that translates English to French."),
+    #     HumanMessage(content="I love programming."),
+    # ]
+    # chat(messages)
+    # -> AIMessage(content="J'aime programmer.", additional_kwargs={})
+
+    # example with multiple pairs of messages
+    batch_messages = [
+        [
+            SystemMessage(content="You are a helpful assistant that translates English to French."),
+            HumanMessage(content="I love programming."),
+        ],
+        [
+            SystemMessage(content="You are a helpful assistant that translates English to French."),
+            HumanMessage(content="I love artificial intelligence."),
+        ],
+    ]
+    result = chat.generate(batch_messages)
+
+
 def sample_serpapi_search_results(
     sample_query="",
 ):
@@ -65,3 +107,5 @@ if __name__ == "__main__":
     # get_company_name_prompt_template()
     # test_serpapi_api_key()
     # sample_serpapi_search_results()
+    # get_demo_conversation_chain()
+    # get_message_completions_from_chat_model()
