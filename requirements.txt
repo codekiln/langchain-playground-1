@@ -1,4 +1,5 @@
 langchain
+langgraph
 openai
 google-search-results
 -r requirements-dev.txt
