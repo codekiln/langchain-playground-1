@@ -1,0 +1,13 @@
+python-dotenv
+langgraph
+langchain-core
+langchain-openai
+langchain-community
+IPython
+tavily-python
+requests
+beautifulsoup4
+duckduckgo-search
+pygments
+aiosqlite
+uuid
