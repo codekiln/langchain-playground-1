@@ -1,4 +1,7 @@
 langchain
 openai
+langchain-aws
+langchain-openai
 google-search-results
+python-dotenv
 -r requirements-dev.txt
