@@ -7,6 +7,9 @@ from langchain_core.runnables import RunnableLambda, ConfigurableField
 load_dotenv()
 
 """
+See related langchain discussion
+[How to correctly identify or test configurable ids when using RunnableLambda and ConfigurableField · langchain-ai/langchain · Discussion #24471](https://github.com/langchain-ai/langchain/discussions/24471) 
+
 This module tests a variation of 
 [How to route between sub-chains](https://python.langchain.com/v0.2/docs/how_to/routing/#using-a-custom-function-recommended)
 that uses ConfigurableFields; see also [https://python.langchain.com/v0.2/docs/how_to/configure/](https://python.langchain.com/v0.2/docs/how_to/configure/)
