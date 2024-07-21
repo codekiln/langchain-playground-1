@@ -1,9 +1,12 @@
+from typing import List
+
 import pytest
 from dotenv import load_dotenv
 
 from langchain_core.output_parsers import StrOutputParser
 from langchain_core.prompts import PromptTemplate
 from langchain_core.runnables import RunnableLambda, ConfigurableField
+from langchain_core.runnables.configurable import RunnableConfigurableFields
 
 load_dotenv()
 
@@ -31,14 +34,14 @@ def get_llm():
 chain = (
     PromptTemplate.from_template(
         """Given the user question below, classify it as either being about `LangChain`, `Anthropic`, or `Other`.
-                                                                
-                                                                Do not respond with more than one word.
-                                                                
-                                                                <question>
-                                                                {question}
-                                                                </question>
-                                                                
-                                                                Classification:"""
+                                                                        
+                                                                        Do not respond with more than one word.
+                                                                        
+                                                                        <question>
+                                                                        {question}
+                                                                        </question>
+                                                                        
+                                                                        Classification:"""
     )
     | get_llm()
     | StrOutputParser()
@@ -62,20 +65,20 @@ langchain_chain = (
 anthropic_chain = (
     PromptTemplate.from_template(
         """You are an expert in anthropic. \
-                                                                Always answer questions starting with "As Dario Amodei told me". \
-                                                                Respond to the following question:
-                                                                
-                                                                Question: {question}
-                                                                Answer:"""
+                                                                        Always answer questions starting with "As Dario Amodei told me". \
+                                                                        Respond to the following question:
+                                                                        
+                                                                        Question: {question}
+                                                                        Answer:"""
     )
     | get_llm()
 )
 general_chain = (
     PromptTemplate.from_template(
         """Respond to the following question:
-                                                                
-                                                                Question: {question}
-                                                                Answer:"""
+                                                                        
+                                                                        Question: {question}
+                                                                        Answer:"""
     )
     | get_llm()
 )
@@ -156,3 +159,33 @@ def test_invoke():
         assert (
             "langchain_prompt" in configurable_id_fields_full_chain
         ), "we expected to have a configurable field id named 'langchain_prompt' in the full chain"
+
+    # Create a custom RunnableLambda that aggregates configurable fields
+    # Credit to dosubot[bot]: https://github.com/langchain-ai/langchain/discussions/24471#discussioncomment-10105978
+    class CustomRunnableLambda(RunnableLambda):
+        def __init__(self, func, chains: List[RunnableConfigurableFields]):
+            super().__init__(func)
+            self.chains = chains
+
+        @property
+        def config_specs(self):
+            # Aggregate config specs from all chains
+            specs = []
+            for chain in self.chains:
+                specs.extend(chain.config_specs)
+            return specs
+
+    full_chain_crl = {"topic": chain, "question": lambda x: x["question"]} | CustomRunnableLambda(
+        route, [langchain_chain, anthropic_chain, general_chain]
+    )
+    full_chain_crl_configured = full_chain_crl.with_config(configurable={"langchain_prompt": substituted_prompt})
+    full_chain_crl_configured_result = full_chain_crl_configured.invoke({"question": "how do I use LangChain?"})
+    # works!
+    assert substitute_with in full_chain_crl_configured_result.content
+
+    # Now, let's see if we can get the configurable fields from the custom RunnableLambda
+    configurable_id_fields_full_chain_crl = [c.id for c in full_chain_crl.config_specs]
+    # works ... but only if you can directly supply the chains to the CustomRunnableLambda;
+    # probably *won't* work if your chains themselves contain other RunnableLambdas that
+    # route to chains that contain ConfigurableFields.
+    assert "langchain_prompt" in configurable_id_fields_full_chain_crl
