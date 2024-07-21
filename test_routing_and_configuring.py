@@ -31,14 +31,14 @@ def get_llm():
 chain = (
     PromptTemplate.from_template(
         """Given the user question below, classify it as either being about `LangChain`, `Anthropic`, or `Other`.
-                                        
-                                        Do not respond with more than one word.
-                                        
-                                        <question>
-                                        {question}
-                                        </question>
-                                        
-                                        Classification:"""
+                                                                
+                                                                Do not respond with more than one word.
+                                                                
+                                                                <question>
+                                                                {question}
+                                                                </question>
+                                                                
+                                                                Classification:"""
     )
     | get_llm()
     | StrOutputParser()
@@ -62,20 +62,20 @@ langchain_chain = (
 anthropic_chain = (
     PromptTemplate.from_template(
         """You are an expert in anthropic. \
-                                        Always answer questions starting with "As Dario Amodei told me". \
-                                        Respond to the following question:
-                                        
-                                        Question: {question}
-                                        Answer:"""
+                                                                Always answer questions starting with "As Dario Amodei told me". \
+                                                                Respond to the following question:
+                                                                
+                                                                Question: {question}
+                                                                Answer:"""
     )
     | get_llm()
 )
 general_chain = (
     PromptTemplate.from_template(
         """Respond to the following question:
-                                        
-                                        Question: {question}
-                                        Answer:"""
+                                                                
+                                                                Question: {question}
+                                                                Answer:"""
     )
     | get_llm()
 )
@@ -145,9 +145,14 @@ def test_invoke():
         assert "langchain_prompt" in full_chain.config_schema().schema()["definitions"]["Configurable"]["properties"]
     assert str(exception_info.value) == "'definitions'"
 
-    # neither will this (so it's also been negated)
+    # neither will this one
     configurable_id_fields_full_chain = [c.id for c in full_chain.config_specs]
-    with pytest.raises(AssertionError) as exception_info:
-        assert configurable_id_fields_full_chain != []
-        # configurable_id_fields_full_chain == []!
-        assert "langchain_prompt" in configurable_id_fields_full_chain
+    with pytest.raises(AssertionError):
+        # at the very least, I would expect to have one configurable field id available
+        assert configurable_id_fields_full_chain != [], (
+            "we expected to have at least one configurable field id " "in the full chain"
+        )
+    with pytest.raises(AssertionError):
+        assert (
+            "langchain_prompt" in configurable_id_fields_full_chain
+        ), "we expected to have a configurable field id named 'langchain_prompt' in the full chain"
